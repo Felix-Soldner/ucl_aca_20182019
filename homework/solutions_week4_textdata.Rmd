@@ -1,0 +1,138 @@
+---
+title: "Solutions: Text data & text mining"
+subtite: "Homework week 4"
+author: "B Kleinberg, D Hammocks, F Soldner"
+subtitle: Advanced Crime Analysis, UCL
+output: html_notebook
+---
+
+**SOLUTIONS**
+
+### Task 1: Creating your Corpus
+
+Select three assignments. Convert them to RAW text files. Import into R and create a corpus.
+
+
+```{r}
+#Load Packages
+require(readr)
+#Import Text files.
+
+
+text1<-read_file('data/GutenbergBooks/AnAfricanMillionaire.txt')
+text2<-read_file('data/GutenbergBooks/CrimeAndPunishment.txt')
+text3<-read_file('data/GutenbergBooks/DeadMenTellNoTales.txt')
+
+#Load Package
+require(quanteda)
+
+#Create a corpus
+corpus = corpus(c(text1, text2, text3))
+```
+
+
+
+### Task 2: Text Statistics
+
+Calcualte the average number of characters per word and the average number of words per sentence.
+
+```{r}
+#Average number of characters per word
+avgCharPerWord<-nchar(corpus[])/ntoken(corpus[])
+#Display Answer#avgCharPerWord
+avgCharPerWord
+
+#Average number of words per sentence
+avgWordPerSentence<-ntoken(corpus[])/nsentence(corpus[])
+#Display Response
+avgWordPerSentence
+```
+
+
+### Task 3: Text Metrics
+What is the type-token ratio (TTR) of your texts (each text individually)?
+
+```{r}
+#TTR of each text
+Text1_TTR<-ntype(corpus[1])/ntoken(corpus[1])
+Text2_TTR<-ntype(corpus[2])/ntoken(corpus[2])
+Text3_TTR<-ntype(corpus[3])/ntoken(corpus[3])
+
+#Display The Answers
+print(c(TTRText1, TTRText2, TTRText3))
+```
+
+
+### Task 4: Word Frequencies
+Build a term frequency count representation, and retrieve the top features (hint: topfeatures) for each text.
+
+```{r}
+# create document-feature matrix
+DFM = dfm(corpus)
+
+#USe topfeatures to get the top features
+topfeatures(DFM[1])
+topfeatures(DFM[2])
+topfeatures(DFM[3])
+```
+
+
+### Task 5: TF-IDF
+Now build a TF-IDF weighted representation of your corpus. Perform this transformation in five different ways: (1) based on the raw texts, (2) removing stopwords, (3) removing punctuation, (4) stemming the words, and (5) combining (2)-(4).
+
+```{r}
+# create tfidf weighting
+# raw text
+DFM = dfm(corpus, tolower = FALSE, stem = FALSE, remove = NULL)
+text_tfidf = dfm_tfidf(DFM, scheme_tf = "prop", scheme_df = "count")
+head(text_tfidf[,1:5])
+
+# removing stopwords
+DFM = dfm(corpus, tolower = FALSE, stem = FALSE, remove = stopwords("english"))
+text_tfidf = dfm_tfidf(DFM, scheme_tf = "prop", scheme_df = "count")
+head(text_tfidf[,1:5])
+# removing punctuation
+
+punctuation = c(".", ",", ":", ";", "(", ")")
+DFM = dfm(corpus, tolower = FALSE, stem = FALSE, remove = punctuation)
+text_tfidf = dfm_tfidf(DFM, scheme_tf = "prop", scheme_df = "count")
+head(text_tfidf[,1:5])
+
+# stemming words
+DFM = dfm(corpus, tolower = FALSE, stem = TRUE, remove = NULL)
+text_tfidf = dfm_tfidf(DFM, scheme_tf = "prop", scheme_df = "count")
+head(text_tfidf[,1:5])
+
+# combining 2-4
+punctuation = c(".", ",", ":", ";", "(", ")")
+DFM = dfm(corpus, tolower = FALSE, stem = TRUE, remove = c(punctuation, stopwords("english")))
+text_tfidf = dfm_tfidf(DFM, scheme_tf = "prop", scheme_df = "count")
+head(text_tfidf[,1:5])
+```
+
+### Task 6: Parts-of-Speech
+For all texts, calculate the part-of-speech proportions and find out which POS tag is used most often by you in each text.
+
+```{r}
+#install.packages("qdap")
+library("qdap")
+# apply part of speech function on each text of the corpus + sort list of frequencies/proportions of tags
+PoSText1 = pos(Corpus[1])
+#PT1Sort = sort(PoSText1$POSfreq, decreasing = TRUE)
+PT1Sort = sort(PoSText1$POSprop, decreasing = TRUE)
+
+PoSText2 = pos(Corpus[2])
+#PT2Sort = sort(PoSText2$POSfreq, decreasing = TRUE)
+PT2Sort = sort(PoSText2$POSprop, decreasing = TRUE)
+
+PoSText3 = pos(Corpus[3])
+#PT3Sort = sort(PoSText3$POSfreq, decreasing = TRUE)
+PT3Sort = sort(PoSText3$POSprop, decreasing = TRUE)
+
+# display frequencies of PoS tags (decreasing) - look up PoS abbreviations online for better understanding
+PT1Sort
+PT2Sort
+PT3Sort
+```
+
+---
